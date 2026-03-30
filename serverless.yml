@@ -1,0 +1,37 @@
+service: social-screenshots
+configValidationMode: off
+
+provider:
+  name: scaleway
+  runtime: python311
+  scwToken: ${env:SCW_SECRET_KEY}
+  scwProject: ${env:SCW_DEFAULT_PROJECT_ID}
+  scwRegion: fr-par
+
+functions:
+  screenshot:
+    handler: handler.handle
+    minScale: 0
+    maxScale: 5
+    memoryLimit: 512
+    timeout: 30s
+    privacy: public
+    httpOption: enabled
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+plugins:
+  - serverless-scaleway-functions
+
+package:
+  patterns:
+    - "!.git/**"
+    - "!.github/**"
+    - "!images/**"
+    - "!node_modules/**"
+    - "!.avatar_cache/**"
+    - handler.py
+    - screenshot_post.py
+    - requirements.txt
+    - "fonts/**"
+    - "454286ac07a6f6e6.jpeg"
