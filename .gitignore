@@ -1,0 +1,6 @@
+# Runtime caches
+.avatar_cache/
+__pycache__/
+
+# Root-level test screenshots (committed ones live in images/)
+/truth_*.png
