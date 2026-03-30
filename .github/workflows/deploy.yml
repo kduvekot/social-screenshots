@@ -12,7 +12,7 @@ jobs:
       SCW_SECRET_KEY: ${{ secrets.SCALEWAY_SECRET_KEY }}
       SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCALEWAY_PROJECT_ID }}
       SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCALEWAY_PROJECT_ID }}
-      SCW_REGION: fr-par
+      SCW_DEFAULT_REGION: fr-par
 
     steps:
       - uses: actions/checkout@v5
@@ -28,12 +28,12 @@ jobs:
         id: namespace
         run: |
           # List existing namespaces, create if missing
-          NS_ID=$(scw function namespace list region=$SCW_REGION -o json | jq -r '.[] | select(.name=="social-screenshots") | .id')
+          NS_ID=$(scw function namespace list region=$SCW_DEFAULT_REGION -o json | jq -r '.[] | select(.name=="social-screenshots") | .id')
           if [ -z "$NS_ID" ]; then
-            NS_ID=$(scw function namespace create region=$SCW_REGION name=social-screenshots -o json | jq -r '.id')
+            NS_ID=$(scw function namespace create region=$SCW_DEFAULT_REGION name=social-screenshots -o json | jq -r '.id')
             echo "Created namespace $NS_ID"
             # Wait for namespace to be ready
-            scw function namespace wait $NS_ID region=$SCW_REGION
+            scw function namespace wait $NS_ID region=$SCW_DEFAULT_REGION
           fi
           echo "ns_id=$NS_ID" >> "$GITHUB_OUTPUT"
 
@@ -45,11 +45,11 @@ jobs:
         id: function
         run: |
           NS_ID=${{ steps.namespace.outputs.ns_id }}
-          FN_ID=$(scw function function list namespace-id=$NS_ID region=$SCW_REGION -o json | jq -r '.[] | select(.name=="screenshot") | .id')
+          FN_ID=$(scw function function list namespace-id=$NS_ID region=$SCW_DEFAULT_REGION -o json | jq -r '.[] | select(.name=="screenshot") | .id')
           if [ -z "$FN_ID" ]; then
             FN_ID=$(scw function function create \
               namespace-id=$NS_ID \
-              region=$SCW_REGION \
+              region=$SCW_DEFAULT_REGION \
               name=screenshot \
               runtime=python311 \
               handler=handler.handle \
@@ -66,10 +66,10 @@ jobs:
 
       - name: Deploy function
         run: |
-          FN_ID=${{ steps.function.outputs.fn_id }}
-          scw function deploy $FN_ID region=$SCW_REGION zip-file=function.zip
+          NS_ID=${{ steps.namespace.outputs.ns_id }}
+          scw function deploy namespace-id=$NS_ID name=screenshot region=$SCW_DEFAULT_REGION zip-file=function.zip
 
       - name: Print endpoint URL
         run: |
           FN_ID=${{ steps.function.outputs.fn_id }}
-          scw function function get $FN_ID region=$SCW_REGION -o json | jq -r '.domain_name' | xargs -I{} echo "Endpoint: https://{}"
+          scw function function get $FN_ID region=$SCW_DEFAULT_REGION -o json | jq -r '.domain_name' | xargs -I{} echo "Endpoint: https://{}"
