@@ -15,7 +15,7 @@ jobs:
           node-version: 20
 
       - name: Install Serverless Framework
-        run: npm install -g serverless serverless-scaleway-functions
+        run: npm install -g serverless@3 serverless-scaleway-functions
 
       - name: Deploy
         run: serverless deploy
