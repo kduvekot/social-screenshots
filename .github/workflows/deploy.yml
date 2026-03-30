@@ -67,7 +67,7 @@ jobs:
       - name: Deploy function
         run: |
           NS_ID=${{ steps.namespace.outputs.ns_id }}
-          scw function deploy namespace-id=$NS_ID name=screenshot region=$SCW_DEFAULT_REGION zip-file=function.zip
+          scw function deploy namespace-id=$NS_ID name=screenshot runtime=python311 region=$SCW_DEFAULT_REGION zip-file=function.zip
 
       - name: Print endpoint URL
         run: |
