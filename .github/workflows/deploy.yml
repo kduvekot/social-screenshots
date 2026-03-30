@@ -15,7 +15,7 @@ jobs:
       SCW_DEFAULT_REGION: fr-par
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install Scaleway CLI
         env:
@@ -44,7 +44,7 @@ jobs:
           cp 454286ac07a6f6e6.jpeg "$WORKDIR/"
           docker run --rm -v "$WORKDIR":/home/app/function \
             --workdir /home/app/function \
-            rg.fr-par.scw.cloud/scwfunctionsruntimes-public/python-dep:3.11 \
+            rg.fr-par.scw.cloud/scwfunctionsruntimes-public/python-dep:3.12 \
             pip3 install --upgrade requests beautifulsoup4 pillow \
             --no-cache-dir --target ./package
           cd "$WORKDIR" && zip -r /tmp/function.zip handler.py screenshot_post.py fonts/ 454286ac07a6f6e6.jpeg package/
@@ -60,7 +60,7 @@ jobs:
               namespace-id=$NS_ID \
               region=$SCW_DEFAULT_REGION \
               name=screenshot \
-              runtime=python311 \
+              runtime=python312 \
               handler=handler.handle \
               min-scale=0 \
               max-scale=5 \
@@ -76,7 +76,7 @@ jobs:
       - name: Deploy function
         run: |
           NS_ID=${{ steps.namespace.outputs.ns_id }}
-          scw function deploy namespace-id=$NS_ID name=screenshot runtime=python311 region=$SCW_DEFAULT_REGION zip-file=function.zip
+          scw function deploy namespace-id=$NS_ID name=screenshot runtime=python312 region=$SCW_DEFAULT_REGION zip-file=function.zip
 
       - name: Print endpoint URL
         run: |
