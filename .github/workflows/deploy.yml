@@ -41,12 +41,18 @@ jobs:
 
       - name: Package function
         run: |
-          cd scaleway
-          pip install --target package requests beautifulsoup4 pillow
-          cp ../screenshot_post.py .
-          cp -r ../fonts .
-          cp ../454286ac07a6f6e6.jpeg .
-          zip -r ../function.zip handler.py screenshot_post.py fonts/ 454286ac07a6f6e6.jpeg package/
+          WORKDIR=$(mktemp -d)
+          cp scaleway/handler.py "$WORKDIR/"
+          cp screenshot_post.py "$WORKDIR/"
+          cp -r fonts "$WORKDIR/"
+          cp 454286ac07a6f6e6.jpeg "$WORKDIR/"
+          docker run --rm -v "$WORKDIR":/home/app/function \
+            --workdir /home/app/function \
+            rg.fr-par.scw.cloud/scwfunctionsruntimes-public/python-dep:3.11 \
+            pip3 install --upgrade requests beautifulsoup4 pillow \
+            --no-cache-dir --target ./package
+          cd "$WORKDIR" && zip -r /tmp/function.zip handler.py screenshot_post.py fonts/ 454286ac07a6f6e6.jpeg package/
+          cp /tmp/function.zip "$GITHUB_WORKSPACE/function.zip"
 
       - name: Create or update function
         id: function
