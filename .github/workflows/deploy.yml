@@ -15,11 +15,12 @@ jobs:
       SCW_REGION: fr-par
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Scaleway CLI
         run: |
-          curl -fsSL https://github.com/scaleway/scaleway-cli/releases/latest/download/scaleway-cli_linux_amd64 -o /usr/local/bin/scw
+          SCW_VERSION=$(curl -fsSL https://api.github.com/repos/scaleway/scaleway-cli/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          curl -fsSL "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_VERSION}/scaleway-cli_${SCW_VERSION}_linux_amd64" -o /usr/local/bin/scw
           chmod +x /usr/local/bin/scw
 
       - name: Create namespace (idempotent)
