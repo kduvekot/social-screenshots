@@ -1,0 +1,16 @@
+{
+  "regions": ["fra1"],
+  "functions": {
+    "api/screenshot.py": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/screenshot",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ]
+}
