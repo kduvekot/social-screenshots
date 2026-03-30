@@ -17,6 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Scaleway CLI
         env:
           GH_TOKEN: ${{ github.token }}
@@ -27,19 +31,22 @@ jobs:
       - name: Create namespace (idempotent)
         id: namespace
         run: |
-          # List existing namespaces, create if missing
           NS_ID=$(scw function namespace list region=$SCW_DEFAULT_REGION -o json | jq -r '.[] | select(.name=="social-screenshots") | .id')
           if [ -z "$NS_ID" ]; then
             NS_ID=$(scw function namespace create region=$SCW_DEFAULT_REGION name=social-screenshots -o json | jq -r '.id')
             echo "Created namespace $NS_ID"
-            # Wait for namespace to be ready
             scw function namespace wait $NS_ID region=$SCW_DEFAULT_REGION
           fi
           echo "ns_id=$NS_ID" >> "$GITHUB_OUTPUT"
 
       - name: Package function
         run: |
-          zip -r function.zip handler.py screenshot_post.py requirements.txt fonts/ 454286ac07a6f6e6.jpeg
+          cd scaleway
+          pip install --target package requests beautifulsoup4 pillow
+          cp ../screenshot_post.py .
+          cp -r ../fonts .
+          cp ../454286ac07a6f6e6.jpeg .
+          zip -r ../function.zip handler.py screenshot_post.py fonts/ 454286ac07a6f6e6.jpeg package/
 
       - name: Create or update function
         id: function
