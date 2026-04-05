@@ -163,12 +163,15 @@ def fetch_post(url_or_id):
     date = meta_items[1].get_text(strip=True) if len(meta_items) > 1 else ""
     avatar_url = avatar_el["src"] if avatar_el and avatar_el.get("src") else None
 
-    # Extract content preserving line breaks (<br/> tags)
+    # Extract content preserving line breaks (<br/> and <p> tags)
     content = ""
     if content_el:
         # Replace <br/> tags with newlines before extracting text
         for br in content_el.find_all("br"):
             br.replace_with("\n")
+        # Insert double newlines between <p> tags for paragraph breaks
+        for p in content_el.find_all("p"):
+            p.insert_before("\n\n")
         content = content_el.get_text()
         # Clean up: collapse multiple spaces, preserve paragraph breaks
         lines = []
